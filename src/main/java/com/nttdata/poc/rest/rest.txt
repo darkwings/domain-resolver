@@ -1,0 +1,3 @@
+Ipotesi per astrarre un client HTTP che permette di eseguire invocazioni su un endpoint remoto.
+
+Va tenuta in mente l'opzione di throttling.
