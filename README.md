@@ -14,9 +14,11 @@ You'll also need the KSQL UDF available in https://github.com/darkwings/ksql-geo
 
 ## Execution
     
-    java -jar target/domain-resolution-1.0.0-SNAPSHOT-jar-with-dependencies.jar localhost:9092 CMPNY_ACTIVITY_WITH_LOCATION_USER cmpny_activity_enriched cmpny_domains /tmp/state-12 api_key_safebrowsing
+    java -Dapi.key=safebrowsing_api_key -jar target/domain-resolution-1.0.0-SNAPSHOT-jar-with-dependencies.jar ./conf/config.properties
     
-    java -jar target/domain-resolution-1.0.0-SNAPSHOT-jar-with-dependencies.jar localhost:9092 CMPNY_ACTIVITY_WITH_LOCATION_USER cmpny_activity_enriched cmpny_domains /tmp/state-121 api_key_safebrowsing
+To start another instance, just provide a configuration file with a different state directory 
+
+    java -Dapi.key=safebrowsing_api_key -jar target/domain-resolution-1.0.0-SNAPSHOT-jar-with-dependencies.jar ./conf/config2.properties
 
 
 ## Prometheus metrics
