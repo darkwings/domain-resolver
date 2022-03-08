@@ -8,7 +8,11 @@ public interface MonitorMBean {
 
     void addDlqMessage();
 
+    void addRetryMessage();
+
     Integer getDlqMessages();
+
+    Integer getRetryMessages();
 
     void addMessageProcessed();
 

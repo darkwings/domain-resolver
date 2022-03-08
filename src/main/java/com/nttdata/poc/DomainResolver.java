@@ -179,9 +179,9 @@ public class DomainResolver {
         enrichNeededBranches.get("Client-KO")
                 .mapValues(v -> v.enrichedData.getActivity())
                 .selectKey((k, v) -> v.getActivityId())
-                // .peek((k,v) -> System.out.println("=======> CLIENT KO"))
-                .peek((k, v) -> monitor.addDlqMessage())
-                .to(options.getDlqTopic(), Produced.with(Serdes.String(), JsonSerDes.activity()));
+                // .peek((k,v) -> System.out.println("=======> CLIENT KO - RETRY"))
+                .peek((k, v) -> monitor.addRetryMessage()) // TODO Retry logic da raffinare!
+                .to(options.getRetryTopic(), Produced.with(Serdes.String(), JsonSerDes.activity()));
 
 
         // 2b:

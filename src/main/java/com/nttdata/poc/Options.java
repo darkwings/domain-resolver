@@ -50,6 +50,8 @@ public class Options {
 
     String dlqTopic;
 
+    String retryTopic;
+
     String endpointUrl;
 
     static Options loadFrom(String path) throws Exception {
@@ -68,6 +70,7 @@ public class Options {
                 .lookupTableTopic(p.getProperty("lookup.table.topic"))
                 .applicationId(p.getProperty("application.id"))
                 .dlqTopic(p.getProperty("dlq.topic"))
+                .retryTopic(p.getProperty("retry.topic"))
                 .endpointUrl(p.getProperty("endpoint.url"))
                 .minInSyncReplicas(Integer.parseInt((String) p.getOrDefault("min.insync.replicas", DEFAULT_MIN_INSYNC_REPLICAS)))
                 .stateStoreTtlEnabled("true".equals(p.getOrDefault("state.store.ttl.check.enabled", DEFAULT_TTL_CKECK_ENABLED)))

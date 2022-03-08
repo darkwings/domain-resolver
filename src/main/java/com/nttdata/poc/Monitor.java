@@ -20,6 +20,7 @@ public class Monitor implements MonitorMBean {
 
     int rebalance;
     int dlqMessages;
+    int retryMessages;
     long messageProcessed;
     final long startTime;
 
@@ -29,6 +30,7 @@ public class Monitor implements MonitorMBean {
     private Monitor() {
         this.rebalance = 0;
         this.dlqMessages = 0;
+        this.retryMessages = 0;
         this.messageProcessed = 0;
         this.windowMessages = 0;
         this.windowStart = System.nanoTime();
@@ -72,8 +74,18 @@ public class Monitor implements MonitorMBean {
     }
 
     @Override
+    public void addRetryMessage() {
+        retryMessages++;
+    }
+
+    @Override
     public Integer getDlqMessages() {
         return dlqMessages;
+    }
+
+    @Override
+    public Integer getRetryMessages() {
+        return retryMessages;
     }
 
     @Override

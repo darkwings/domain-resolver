@@ -29,7 +29,10 @@ class OptionsTest {
         assertThat(options.getSourceTopic()).isEqualTo("topic_source");
         assertThat(options.getDestTopic()).isEqualTo("topic_enriched");
         assertThat(options.getLookupTableTopic()).isEqualTo("topic_lookup");
+        assertThat(options.getDlqTopic()).isEqualTo("topic_dlq");
+        assertThat(options.getRetryTopic()).isEqualTo("topic_retry");
         assertThat(options.getEndpointUrl()).isEqualTo("https://fake.url");
+        assertThat(options.getStateStoreDir()).isEqualTo("/tmp/state-11");
         assertThat(options.getMinInSyncReplicas()).isEqualTo(2);
         assertThat(options.isStateStoreTtlEnabled()).isTrue();
         assertThat(options.getStateStoreTtlPeriodMs()).isEqualTo(14500L);

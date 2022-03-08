@@ -1,0 +1,25 @@
+TODO per il futuro
+
+## -----------------------------
+## RETRY
+## -----------------------------
+
+Si può ipotizzare, in caso di particolari errori, un retry.
+In questo particolare caso, se il sistema esterno non risponde, o risponde con un errore, si può pubblicare
+il messaggio su un topic di retry. Un consumer dedicato processa il messaggio, con un delay opportuno, e
+prova a rimettere il messaggio sul topic source della topologia per un reprocess.
+
+Si può anche pensare a logiche raffinate, tipo
+- exponential backoff per il retry (delay crescente)
+- numero massimo di retry. Ad esempio, al quarto retry fallito, per qualsiasi motivo, il messaggio va comunque in DLQ.
+
+
+## -----------------------------
+## EXACTLY ONCE
+## -----------------------------
+
+Da capire se attivare la funzionalità EOS. Richiede configurazione dedicata, e probabilmente
+introduce penalizzazione nel throughput. Benchmark!!!
+
+
+

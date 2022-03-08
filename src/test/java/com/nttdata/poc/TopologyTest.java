@@ -75,6 +75,8 @@ class TopologyTest {
                 .stateStoreTtlEnabled(true)
                 .lookupTableTopic("test_domains")
                 .destTopic("test_enriched")
+                .dlqTopic("test_dlq")
+                .retryTopic("test_retry")
                 .sourceTopic("test_source")
                 .applicationId("my_app")
                 .cacheMaxBufferingBytes(0)
