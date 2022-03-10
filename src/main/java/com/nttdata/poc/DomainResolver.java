@@ -51,9 +51,6 @@ import static org.apache.kafka.streams.StreamsConfig.DEFAULT_DESERIALIZATION_EXC
 import static org.apache.kafka.streams.StreamsConfig.STATE_DIR_CONFIG;
 import static org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler.StreamThreadExceptionResponse.REPLACE_THREAD;
 
-/**
- * TODO configurare la retention dello state store
- */
 @Slf4j
 public class DomainResolver {
 
@@ -67,6 +64,11 @@ public class DomainResolver {
         log.info("Configuration report: {}", options);
         val resolver = new DomainResolver(options);
         resolver.start();
+
+//        new GenericTopology("generic_in", "generic_2",
+//                "firstStep", "ADDED", "first-transform");
+//        new GenericTopology("generic_2", "generic_out",
+//                "secondStep", "ADDED", "first-transform");
     }
 
     public DomainResolver(Options options) {
@@ -300,6 +302,9 @@ public class DomainResolver {
                             kvStore.delete(entry.key);
                         }
                     }
+                }
+                catch (Exception e) {
+                    log.error("Failed to process scheduled task", e);
                 }
             }
 

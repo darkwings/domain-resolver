@@ -7,6 +7,8 @@ import com.nttdata.poc.model.Domain;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 
+import java.util.Map;
+
 public class JsonSerDes {
 
     public static Serde<Activity> activity() {
@@ -22,5 +24,10 @@ public class JsonSerDes {
     public static Serde<Domain> domain() {
         return Serdes.serdeFrom(new JsonSerializer<>(),
                 new JsonDeserializer<>(Domain.class));
+    }
+
+    public static Serde<Map> map() {
+        return Serdes.serdeFrom(new JsonSerializer<>(),
+                new JsonDeserializer<>(Map.class));
     }
 }

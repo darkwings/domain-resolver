@@ -1,5 +1,7 @@
 # KSQL DB Preparation
 
+OBSOLETE, see POC-it.md
+
 ## KSQL Streams and Tables
 
 When topics are created, create the following stream and tables
