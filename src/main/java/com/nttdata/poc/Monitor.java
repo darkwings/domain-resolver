@@ -21,6 +21,8 @@ public class Monitor implements MonitorMBean {
     int rebalance;
     int dlqMessages;
     int retryMessages;
+    int cacheHit;
+    int cacheMiss;
     long messageProcessed;
     final long startTime;
 
@@ -33,6 +35,8 @@ public class Monitor implements MonitorMBean {
         this.retryMessages = 0;
         this.messageProcessed = 0;
         this.windowMessages = 0;
+        this.cacheHit = 0;
+        this.cacheMiss = 0;
         this.windowStart = System.nanoTime();
         this.startTime = System.nanoTime();
     }
@@ -56,6 +60,26 @@ public class Monitor implements MonitorMBean {
     @VisibleForTesting
     static Monitor createForTest() {
         return new Monitor();
+    }
+
+    @Override
+    public void addCacheHit() {
+        cacheHit++;
+    }
+
+    @Override
+    public Integer getCacheHit() {
+        return cacheHit;
+    }
+
+    @Override
+    public void addCacheMiss() {
+        cacheMiss++;
+    }
+
+    @Override
+    public Integer getCacheMiss() {
+        return cacheMiss;
     }
 
     @Override

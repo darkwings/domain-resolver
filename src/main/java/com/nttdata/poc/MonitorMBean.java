@@ -10,9 +10,17 @@ public interface MonitorMBean {
 
     void addRetryMessage();
 
+    void addCacheHit();
+
+    void addCacheMiss();
+
     Integer getDlqMessages();
 
     Integer getRetryMessages();
+
+    Integer getCacheHit();
+
+    Integer getCacheMiss();
 
     void addMessageProcessed();
 

@@ -9,6 +9,12 @@
     bin/kafka-topics --create --topic cmpny_activity_dlq --replication-factor 1 --partitions 4 --bootstrap-server localhost:9092
     bin/kafka-topics --create --topic cmpny_activity_retry_1 --replication-factor 1 --partitions 4 --bootstrap-server localhost:9092
 
+    bin/kafka-topics --create --topic session_in --replication-factor 1 --partitions 4 --bootstrap-server localhost:9092
+    bin/kafka-topics --create --topic session_out --replication-factor 1 --partitions 4 --bootstrap-server localhost:9092
+
+    bin/kafka-topics --create --topic generic_in --replication-factor 1 --partitions 4 --bootstrap-server localhost:9092
+    bin/kafka-topics --create --topic generic_out --replication-factor 1 --partitions 4 --bootstrap-server localhost:9092
+
 Then follow instructions on KSQL.md file to prepare KSQL path.
 
 You'll also need the KSQL UDF available in https://github.com/darkwings/ksql-geoip.

@@ -155,7 +155,10 @@ public class DomainResolver {
         enrichBranches.get("Enrich-done")
                 .selectKey(this::enrichedStreamKey)
                 // .peek((k,v) -> System.out.println("=======> ENRICH_DONE " + v))
-                .peek((k, v) -> monitor.addMessageProcessed())
+                .peek((k, v) -> {
+                    monitor.addMessageProcessed();
+                    monitor.addCacheHit();
+                })
                 .to(options.getDestTopic(), Produced.with(Serdes.String(), JsonSerDes.activityEnriched()));
 
         // Caso 2
@@ -166,6 +169,7 @@ public class DomainResolver {
         val enrichNeeded = enrichBranches
                 .get("Enrich-to-be-done")
                 // .peek((k,v) -> System.out.println("=======> ENRICH_TO_BE_DONE"))
+                .peek((k, v) -> monitor.addCacheMiss())
                 .transformValues(supplyValueTransformer(options), STORE_NAME);
 
 

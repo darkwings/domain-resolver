@@ -1,20 +1,27 @@
 package com.nttdata.poc;
 
+import com.nttdata.poc.model.SessionIn;
+import com.nttdata.poc.model.SessionData;
 import com.nttdata.poc.serializer.JsonSerDes;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.errors.LogAndContinueExceptionHandler;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Produced;
+import org.apache.kafka.streams.kstream.SessionWindows;
+import org.apache.kafka.streams.processor.TimestampExtractor;
 
-import java.util.Map;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -28,20 +35,18 @@ import static org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler.St
 
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class GenericTopology {
+public class SessionWindowSample {
 
     String topicIn;
     String topicOut;
-    String enrichField;
-    String enrichValue;
     String applicationId;
+    int neededInput;
 
-    GenericTopology(String topicIn, String topicOut, String enrichField, String enrichValue, String applicationId) {
-        this.topicIn =topicIn;
+    public SessionWindowSample(String topicIn, String topicOut, String applicationId, int neededInput) {
+        this.topicIn = topicIn;
         this.topicOut = topicOut;
-        this.enrichField = enrichField;
-        this.enrichValue = enrichValue;
         this.applicationId = applicationId;
+        this.neededInput = neededInput;
 
         val streams = new KafkaStreams(createTopology(), properties());
         streams.setGlobalStateRestoreListener(new RestoreListener());
@@ -59,14 +64,30 @@ public class GenericTopology {
     private Topology createTopology() {
         val builder = new StreamsBuilder();
 
-        KStream<String, Map> in = builder.stream(topicIn, Consumed.with(Serdes.String(), JsonSerDes.map()));
+        KStream<String, SessionIn> in = builder.stream(topicIn,
+                Consumed.with(Serdes.String(), JsonSerDes.sessionIn())
+                        .withTimestampExtractor(new CustomSessionTimestampExtractor()));
 
-        val stringObjectKStream = in.mapValues(v -> {
-            v.put(enrichField, enrichValue);
-            return v;
-        });
-        stringObjectKStream
-                .to(topicOut, Produced.with(Serdes.String(), JsonSerDes.map()));
+        val rekeyStream = in.selectKey((k, v) -> v.getActivity().getActivityId());
+
+        rekeyStream
+                .groupByKey()
+                .windowedBy(SessionWindows.ofInactivityGapAndGrace(Duration.ofSeconds(30), Duration.ofSeconds(5))) // TODO configurabile
+                .aggregate(SessionData::new,
+                        (key, value, aggregate) -> {
+                            if (aggregate.isEmpty()) {
+                                aggregate.init(value.getActivity());
+                            }
+                            aggregate.addLogType(value.getLogType());
+                            return aggregate;
+                        }, (aggKey, aggOne, aggTwo) -> null)
+                .filter((k, v) -> v.isComplete(neededInput)) // Branch, se il messaggio non è completo, va in DLQ
+                .toStream()
+                .map((windowedKey, data) -> {
+                    return KeyValue.pair(windowedKey.key(), data);
+                })
+                .mapValues(SessionData::getActivity)
+                .to(topicOut, Produced.with(Serdes.String(), JsonSerDes.activity()));
         return builder.build();
     }
 
@@ -80,5 +101,21 @@ public class GenericTopology {
         p.put(DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG, LogAndContinueExceptionHandler.class.getName());
         //p.put(DEFAULT_PRODUCTION_EXCEPTION_HANDLER_CLASS_CONFIG, AlwaysContinueProductionExceptionHandler.class.getName())
         return p;
+    }
+
+    /**
+     * Esempio di Custom TS extractor
+     *
+     */
+    public static class CustomSessionTimestampExtractor implements TimestampExtractor {
+
+        @Override
+        public long extract(ConsumerRecord<Object, Object> record, long partitionTime) {
+            SessionIn a = (SessionIn) record.value();
+            if (a != null && a.getActivity() != null && a.getActivity().getTimestamp() != null) {
+                return Instant.parse(a.getActivity().getTimestamp()).toEpochMilli();
+            }
+            return partitionTime;
+        }
     }
 }
